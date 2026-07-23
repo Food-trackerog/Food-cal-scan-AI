@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scan Result - Food Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">&larr; Scan another</a>
+
+        <h1>{{ result.food_name }}</h1>
+        <p class="serving-info">Serving: {{ result.serving_description }}</p>
+        <div class="badges">
+            <span class="tag tag-{{ 'veg' if result.veg_status == 'Veg' else 'nonveg' }}">{{ result.veg_status }}</span>
+            <span class="tag tag-weight">{{ result.weight_category }}</span>
+            <span class="tag tag-health-{{ 'good' if result.healthy_status == 'Healthy' else ('mid' if 'Moderate' in result.healthy_status else 'bad') }}">
+                {{ result.healthy_status }}
+            </span>
+        </div>
+
+        <div class="nutrition-grid">
+            <div class="nutrition-card">
+                <span class="value">{{ result.calories }}</span>
+                <span class="label">Calories (kcal)</span>
+            </div>
+            <div class="nutrition-card">
+                <span class="value">{{ result.protein }}g</span>
+                <span class="label">Protein</span>
+            </div>
+            <div class="nutrition-card">
+                <span class="value">{{ result.fat }}g</span>
+                <span class="label">Fat</span>
+            </div>
+            <div class="nutrition-card">
+                <span class="value">{{ result.carbs }}g</span>
+                <span class="label">Carbs</span>
+            </div>
+            <div class="nutrition-card">
+                <span class="value">{{ result.sugar }}g</span>
+                <span class="label">Sugar</span>
+            </div>
+            <div class="nutrition-card">
+                <span class="value">{{ result.fiber }}g</span>
+                <span class="label">Fiber</span>
+            </div>
+            <div class="nutrition-card">
+                <span class="value">{{ result.sodium }}mg</span>
+                <span class="label">Sodium</span>
+            </div>
+        </div>
+
+        <p class="disclaimer">Nutrition values are estimates from a live food database and may vary by portion size and preparation method.</p>
+    </div>
+</body>
+</html>

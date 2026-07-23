@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Food Scanner - Nutrition Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <span class="welcome-text">👋 Hi, {{ user_name }}</span>
+            <a href="/logout" class="logout-link">Logout</a>
+        </div>
+        <h1>🍽️ Food Scanner</h1>
+        <p class="subtitle">Point your camera at food and get instant nutrition analysis</p>
+
+        {% if error %}
+        <div class="error-box">{{ error }}</div>
+        {% endif %}
+
+        <form action="/scan" method="POST" enctype="multipart/form-data" class="upload-form" id="scanForm">
+
+            <!-- Live camera view -->
+            <div class="camera-box">
+                <video id="cameraPreview" autoplay playsinline></video>
+                <canvas id="captureCanvas" style="display:none;"></canvas>
+                <img id="previewImg" style="display:none;">
+            </div>
+
+            <div class="camera-controls">
+                <button type="button" id="openCameraBtn" class="btn-camera">📷 Open Camera</button>
+                <button type="button" id="captureBtn" class="btn-capture" style="display:none;">📸 Capture &amp; Scan</button>
+                <button type="button" id="retakeBtn" class="btn-secondary" style="display:none;">↺ Retake</button>
+            </div>
+
+            <div class="divider"><span>or</span></div>
+
+            <input type="file" name="photo" id="fileInput" accept="image/*" class="file-input">
+            <button type="submit" id="uploadScanBtn" class="btn-upload-scan">🔍 Scan Uploaded Photo</button>
+        </form>
+
+        {% if history %}
+        <h2 class="history-title">Recent Scans</h2>
+        <ul class="history-list">
+            {% for h in history %}
+            <li class="history-item">
+                <div>
+                    <strong>{{ h['food_name'] }}</strong>
+                    <span class="tag tag-{{ 'veg' if h['veg_status'] == 'Veg' else 'nonveg' }}">{{ h['veg_status'] }}</span>
+                </div>
+                <div class="history-meta">
+                    {{ h['calories'] }} kcal &middot; {{ h['weight_category'] }} &middot; {{ h['healthy_status'] }}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <script>
+        const openCameraBtn = document.getElementById('openCameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const retakeBtn = document.getElementById('retakeBtn');
+        const video = document.getElementById('cameraPreview');
+        const canvas = document.getElementById('captureCanvas');
+        const previewImg = document.getElementById('previewImg');
+        const fileInput = document.getElementById('fileInput');
+        const form = document.getElementById('scanForm');
+        const uploadScanBtn = document.getElementById('uploadScanBtn');
+
+        let stream = null;
+
+        // Hide the manual "Scan Uploaded Photo" button until a file is actually chosen,
+        // to keep the camera flow front-and-center.
+        uploadScanBtn.style.display = 'none';
+        fileInput.addEventListener('change', () => {
+            uploadScanBtn.style.display = fileInput.files.length ? 'block' : 'none';
+        });
+
+        openCameraBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" }
+                });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                previewImg.style.display = 'none';
+                openCameraBtn.style.display = 'none';
+                captureBtn.style.display = 'inline-block';
+                retakeBtn.style.display = 'none';
+            } catch (err) {
+                alert("Couldn't access camera: " + err.message + "\nYou can still upload a photo below.");
+            }
+        });
+
+        captureBtn.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+
+            canvas.toBlob((blob) => {
+                const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+
+                // Show the captured frame as a static preview
+                previewImg.src = canvas.toDataURL('image/jpeg');
+                previewImg.style.display = 'block';
+                video.style.display = 'none';
+
+                // Stop the camera stream
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+
+                captureBtn.style.display = 'none';
+                retakeBtn.style.display = 'inline-block';
+
+                // Auto-submit for scan
+                form.submit();
+            }, 'image/jpeg', 0.9);
+        });
+
+        retakeBtn.addEventListener('click', () => {
+            previewImg.style.display = 'none';
+            openCameraBtn.style.display = 'inline-block';
+            retakeBtn.style.display = 'none';
+            openCameraBtn.click();
+        });
+    </script>
+</body>
+</html>
