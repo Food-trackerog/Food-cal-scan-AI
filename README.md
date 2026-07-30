@@ -115,3 +115,11 @@ over HTTPS by default).
   by portion size and recipe
 - The "Healthy/Not Healthy" verdict is a simple rule-of-thumb (based on
   calories, fat, sugar, protein) meant for a class project — not medical advice
+
+## Deployment
+This app is deployed on Render. To deploy your own copy:
+1. Push this repo to GitHub
+2. Create a new Web Service on Render and connect the repo
+3. Set Build Command: `pip install -r requirements.txt`
+4. Set Start Command: `gunicorn app:app`
+5. Add the environment variables from `.env.example` in the Render dashboard
