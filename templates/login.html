@@ -8,17 +8,9 @@
 </head>
 <body>
 
-    <!-- Deep dark aurora background -->
-    <div class="bg-layer">
-        <div class="aurora-blob blob-a"></div>
-        <div class="aurora-blob blob-b"></div>
-        <div class="aurora-blob blob-c"></div>
-    </div>
-    <canvas id="starfield"></canvas>
-
     <div class="scene-wrapper">
 
-        <!-- LEFT: Glassmorphism auth card -->
+        <!-- LEFT: Auth card -->
         <div class="auth-side">
             <div class="glass-card" id="glassCard">
 
@@ -80,7 +72,7 @@
                                 Google
                             </button>
                             <button type="button" class="social-btn" title="Coming soon">
-                                <svg viewBox="0 0 24 24"><path fill="#fff" d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.36-3.37-1.36-.46-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.05 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.9-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.46.1 2.72.64.71 1.03 1.62 1.03 2.74 0 3.92-2.35 4.79-4.58 5.04.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+                                <svg viewBox="0 0 24 24"><path fill="#1F2A24" d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.36-3.37-1.36-.46-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.05 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.9-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.46.1 2.72.64.71 1.03 1.62 1.03 2.74 0 3.92-2.35 4.79-4.58 5.04.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
                                 GitHub
                             </button>
                         </div>
@@ -150,9 +142,12 @@
             </div>
         </div>
 
-        <!-- RIGHT: Immersive 3D scene -->
-        <div class="scene-side">
-            <canvas id="webgl-scene"></canvas>
+        <!-- RIGHT: Food photography panel -->
+        <div class="photo-side">
+            <div class="photo-caption">
+                <h2>Know exactly<br>what's on your plate</h2>
+                <p>Snap a photo of any meal and instantly see its calories, protein, carbs and fat — no manual searching, no guesswork.</p>
+            </div>
         </div>
 
     </div>
@@ -160,7 +155,6 @@
     <script>
         window.__INITIAL_PANEL__ = "{{ initial_face }}";
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="{{ url_for('static', filename='premium-auth.js') }}"></script>
 
