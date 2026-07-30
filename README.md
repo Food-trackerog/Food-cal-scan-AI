@@ -1,4 +1,4 @@
-# 🍽️ Food Scanner — AI Nutrition Analyzer
+# 🍽️ DietMitra — AI Nutrition Analyzer
 
 Open your camera, point it at any food (samosa, paneer, biryani, salad, etc.),
 and get an instant, accurate nutrition breakdown: calories, protein, fat,
@@ -53,7 +53,7 @@ Regular Gmail passwords don't work for this — you need an **App Password**:
 1. Go to your Google Account → **Security**
 2. Turn on **2-Step Verification** (if not already on)
 3. Go to https://myaccount.google.com/apppasswords
-4. Create a new App Password (name it "Food Scanner")
+4. Create a new App Password (name it "DietMitra")
 5. Copy the 16-character password shown
 
 ### Set up your `.env` file

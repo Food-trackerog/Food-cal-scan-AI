@@ -1,5 +1,5 @@
 /* ============================================================
-   FOOD SCANNER LOGIN — Interaction Engine
+   DietMitra LOGIN — Interaction Engine
    Requires: GSAP (3.x) loaded before this file
    ============================================================ */
 

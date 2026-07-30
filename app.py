@@ -126,13 +126,13 @@ def send_reset_email(to_email, reset_link):
         )
 
     body = (
-        f"Hi,\n\nWe received a request to reset your Food Scanner password.\n\n"
+        f"Hi,\n\nWe received a request to reset your DietMitra password.\n\n"
         f"Click the link below to set a new password (valid for "
         f"{RESET_TOKEN_VALID_MINUTES} minutes):\n\n{reset_link}\n\n"
         f"If you didn't request this, you can safely ignore this email."
     )
     msg = MIMEText(body)
-    msg["Subject"] = "Reset your Food Scanner password"
+    msg["Subject"] = "Reset your DietMitra password"
     msg["From"] = GMAIL_ADDRESS
     msg["To"] = to_email
 
