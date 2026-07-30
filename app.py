@@ -4,6 +4,7 @@ import base64
 import json
 import sqlite3
 import secrets
+import uuid
 import smtplib
 from datetime import datetime, timedelta
 from functools import wraps
@@ -434,9 +435,10 @@ def scan():
             user_name=session.get("user_name"),
         )
 
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
+    ext = file.filename.rsplit(".", 1)[1].lower()
+    unique_filename = f"{uuid.uuid4().hex}.{ext}"
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
     file.save(filepath)
-
     try:
         info = analyze_food_image(filepath)
 
