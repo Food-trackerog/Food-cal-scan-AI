@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - DietMitra</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+    <div class="wrap">
+
+        <div class="dash-nav">
+            <div class="dash-brand">🍽️ DietMitra</div>
+            <div class="dash-nav-right">
+                <span class="dash-welcome">👋 Hi, {{ user_name }}</span>
+                <a href="/logout" class="dash-logout">Logout</a>
+            </div>
+        </div>
+
+        <section class="dash-hero" style="background-image: linear-gradient(100deg, rgba(30,25,15,0.86) 10%, rgba(30,25,15,0.45) 50%, rgba(30,25,15,0.08) 75%), url('{{ url_for('static', filename='images/dashboard-hero.jpg') }}');">
+
+            <div class="ring-card">
+                <div class="ring" style="background: conic-gradient(var(--accent) 0deg {{ stats.goal_deg }}deg, #EFE8DA {{ stats.goal_deg }}deg 360deg);">
+                    <div class="ring-inner">
+                        <strong>{{ stats.today_calories }}</strong>
+                        <span>KCAL TODAY</span>
+                    </div>
+                </div>
+                <div class="ring-copy">
+                    <strong>{{ stats.goal_percent }}% of goal</strong>
+                    <span>{{ stats.goal }} kcal target</span>
+                </div>
+            </div>
+
+            <div class="dash-hero-inner">
+                <div class="dash-eyebrow">Welcome back</div>
+                <h1>Know exactly what's on your plate</h1>
+                <p>Snap a photo of any meal and get calories, protein, carbs and a clear healthy verdict — instantly, no guesswork.</p>
+                <div class="dash-cta-row">
+                    <a href="{{ url_for('scanner') }}" class="btn-start-scan">📷 Start New Scan</a>
+                    {% if stats.total_scans > 0 %}
+                    <a href="{{ url_for('scanner') }}" class="dash-link-muted">View full history</a>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <div class="section-head">
+            <h2>Recent Scans</h2>
+            {% if history %}
+            <a href="{{ url_for('scanner') }}">See all &rarr;</a>
+            {% endif %}
+        </div>
+
+        <div class="scan-grid">
+            {% if history %}
+                {% for h in history %}
+                <div class="scan-card">
+                    <div class="scan-emoji">{{ '🥦' if h['veg_status'] == 'Veg' else '🍗' }}</div>
+                    <div class="scan-meta">
+                        <div class="top-row">
+                            <h3>{{ h['food_name'] }}</h3>
+                            <span class="scan-time">{{ h['time_label'] }}</span>
+                        </div>
+                        <div class="tag-row">
+                            <span class="dtag {{ 'veg' if h['veg_status'] == 'Veg' else 'nonveg' }}">{{ h['veg_status']|upper }}</span>
+                            <span class="dtag {{ 'healthy' if h['healthy_status'] == 'Healthy' else ('moderate' if 'Moderate' in h['healthy_status'] else 'unhealthy') }}">
+                                {{ 'HEALTHY' if h['healthy_status'] == 'Healthy' else ('MODERATE' if 'Moderate' in h['healthy_status'] else 'NOT HEALTHY') }}
+                            </span>
+                        </div>
+                        <div class="macro-row">
+                            <span><b>{{ h['calories']|round|int }}</b> kcal</span>
+                            <span><b>{{ h['protein']|round|int }}g</b> protein</span>
+                            <span><b>{{ h['carbs']|round|int }}g</b> carbs</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-scans">
+                    You haven't scanned anything yet. <a href="{{ url_for('scanner') }}">Scan your first meal &rarr;</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="stats-strip">
+            <div class="stat-box"><div class="num">{{ stats.scans_this_month }}</div><div class="lbl">Scans this month</div></div>
+            <div class="stat-box alt"><div class="num">{{ stats.streak }}</div><div class="lbl">Day streak</div></div>
+            <div class="stat-box alt"><div class="num">{{ stats.healthy_percent }}%</div><div class="lbl">Meals marked healthy</div></div>
+            <div class="stat-box"><div class="num">{{ stats.today_calories }}</div><div class="lbl">Calories logged today</div></div>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -36,6 +36,8 @@ GEMINI_URL = (
 GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")
 
+DAILY_CALORIE_GOAL = 2200
+
 EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 RESET_TOKEN_VALID_MINUTES = 30
 
@@ -106,6 +108,78 @@ def to_num(value):
         return float(value)
     except (TypeError, ValueError):
         return 0.0
+
+
+def humanize_scanned_at(ts):
+    """Turn '2026-07-31 09:40' into 'Today, 9:40 AM' / 'Yesterday, ...' etc."""
+    if not ts:
+        return ""
+    try:
+        dt = datetime.strptime(ts, "%Y-%m-%d %H:%M")
+    except ValueError:
+        return ts
+
+    today = datetime.now().date()
+    time_part = dt.strftime("%I:%M %p").lstrip("0")
+
+    if dt.date() == today:
+        return f"Today, {time_part}"
+    elif dt.date() == today - timedelta(days=1):
+        return f"Yesterday, {time_part}"
+    else:
+        return dt.strftime("%d %b").lstrip("0") + f", {time_part}"
+
+
+def compute_dashboard_stats(user_id):
+    """Aggregate scan history into the numbers shown on the dashboard."""
+    conn = get_db_connection()
+    all_scans = conn.execute(
+        "SELECT * FROM scans WHERE user_id = ? ORDER BY id DESC", (user_id,)
+    ).fetchall()
+    conn.close()
+
+    now = datetime.now()
+    today_str = now.strftime("%Y-%m-%d")
+    month_str = now.strftime("%Y-%m")
+
+    scans_this_month = 0
+    today_calories = 0.0
+    healthy_count = 0
+    scan_dates = set()
+
+    for s in all_scans:
+        date_part = (s["scanned_at"] or "")[:10]
+        if date_part.startswith(month_str):
+            scans_this_month += 1
+        if date_part == today_str:
+            today_calories += to_num(s["calories"])
+        if s["healthy_status"] == "Healthy":
+            healthy_count += 1
+        if date_part:
+            scan_dates.add(date_part)
+
+    total = len(all_scans)
+    healthy_percent = round((healthy_count / total) * 100) if total else 0
+
+    # Streak: consecutive days (ending today) that have at least one scan.
+    streak = 0
+    day = now.date()
+    while day.strftime("%Y-%m-%d") in scan_dates:
+        streak += 1
+        day -= timedelta(days=1)
+
+    goal_percent = min(100, round((today_calories / DAILY_CALORIE_GOAL) * 100)) if DAILY_CALORIE_GOAL else 0
+
+    return {
+        "scans_this_month": scans_this_month,
+        "today_calories": round(today_calories),
+        "healthy_percent": healthy_percent,
+        "streak": streak,
+        "total_scans": total,
+        "goal": DAILY_CALORIE_GOAL,
+        "goal_percent": goal_percent,
+        "goal_deg": round(goal_percent * 3.6),
+    }
 
 
 # ---------- AUTH HELPERS ----------
@@ -411,25 +485,52 @@ def classify_healthy(calories, protein, fat, sugar):
 @app.route("/")
 @login_required
 def index():
+    user_id = session["user_id"]
+    conn = get_db_connection()
+    recent_rows = conn.execute(
+        "SELECT * FROM scans WHERE user_id = ? ORDER BY id DESC LIMIT 5",
+        (user_id,)
+    ).fetchall()
+    conn.close()
+
+    history = []
+    for h in recent_rows:
+        item = dict(h)
+        item["time_label"] = humanize_scanned_at(h["scanned_at"])
+        history.append(item)
+
+    stats = compute_dashboard_stats(user_id)
+
+    return render_template(
+        "dashboard.html",
+        history=history,
+        user_name=session.get("user_name"),
+        stats=stats,
+    )
+
+
+@app.route("/scanner")
+@login_required
+def scanner():
     conn = get_db_connection()
     history = conn.execute(
         "SELECT * FROM scans WHERE user_id = ? ORDER BY id DESC LIMIT 10",
         (session["user_id"],)
     ).fetchall()
     conn.close()
-    return render_template("index.html", history=history, user_name=session.get("user_name"))
+    return render_template("scanner.html", history=history, user_name=session.get("user_name"))
 
 
 @app.route("/scan", methods=["POST"])
 @login_required
 def scan():
     if "photo" not in request.files:
-        return redirect(url_for("index"))
+        return redirect(url_for("scanner"))
 
     file = request.files["photo"]
     if file.filename == "" or not allowed_file(file.filename):
         return render_template(
-            "index.html",
+            "scanner.html",
             error="Please choose or capture a valid image file (jpg/png/webp).",
             history=[],
             user_name=session.get("user_name"),
@@ -481,7 +582,7 @@ def scan():
 
     except Exception as e:
         return render_template(
-            "index.html", error=f"Something went wrong: {str(e)}",
+            "scanner.html", error=f"Something went wrong: {str(e)}",
             history=[], user_name=session.get("user_name")
         )
 

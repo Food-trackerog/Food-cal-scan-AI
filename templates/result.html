@@ -7,7 +7,7 @@
 </head>
 <body>
     <div class="container">
-        <a href="/" class="back-link">&larr; Scan another</a>
+        <a href="{{ url_for('scanner') }}" class="back-link">&larr; Scan another</a>
 
         <h1>{{ result.food_name }}</h1>
         <p class="serving-info">Serving: {{ result.serving_description }}</p>
